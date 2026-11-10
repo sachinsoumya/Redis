@@ -6,39 +6,56 @@ const app = express();
 
 app.use(express.json());
 
-const client = require("./Client");
+const userRoutes = require("./routes/user");
 
-app.get("/", async (req, res) => {
-  try {
-    const cacheResults = await client.get("users");
+// const client = require("./Client");
 
-    if (cacheResults) {
-      res.json({
-        message: "data fetched from cache",
-        data: JSON.parse(cacheResults),
-      });
-    }
+const connectDB = require("./config/database");
 
-    const { data } = await axios.get(
-      "https://jsonplaceholder.typicode.com/users",
-    );
-    console.log(data);
+app.use("/api/user" , userRoutes);
 
-    const response = await client.set("users", JSON.stringify(data));
+// app.get("/", async (req, res) => {
+//   try {
+//     const cacheResults = await client.get("users");
 
-    console.log(response);
+//     if (cacheResults) {
+//       res.json({
+//         message: "data fetched from cache",
+//         data: JSON.parse(cacheResults),
+//       });
+//     }
 
-    await client.expire("users", 100);
+//     const { data } = await axios.get(
+//       "https://jsonplaceholder.typicode.com/users",
+//     );
+//     console.log(data);
 
-    res.json({
-      message: "data fetched successfully",
-      data: data,
+//     const response = await client.set("users", JSON.stringify(data));
+
+//     console.log(response);
+
+//     await client.expire("users", 100);
+
+//     res.json({
+//       message: "data fetched successfully",
+//       data: data,
+//     });
+//   } catch (err) {
+//     res.send("Error " + " " + err.message);
+//   }
+// });
+
+
+
+
+connectDB()
+  .then(() => {
+    console.log("MongoDB connected successfully");
+
+    app.listen(7777, (req, res) => {
+      console.log("server is listening on port 7777");
     });
-  } catch (err) {
-    res.send("Error " + " " + err.message);
-  }
-});
-
-app.listen(7777, (req, res) => {
-  console.log("server is listing on port 7777");
-});
+  })
+  .catch((err) => {
+    console.log("Error while connecting to MongoDB", err.message);
+  });
