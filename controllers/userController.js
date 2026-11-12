@@ -1,8 +1,27 @@
 const User = require("../model/user");
 
+const client = require("../redis/Client");
+
 const getAllUsers = async (req, res) => {
   try {
+    const cacheResults = await client.get("users:all");
+
+    console.log(cacheResults);
+
+    if (cacheResults) {
+      return res.json({
+        message: "Data fetched from cache",
+        data: JSON.parse(cacheResults),
+      });
+    }
+
     const users = await User.find({});
+    const response = await client.set("users:all", JSON.stringify(users));
+
+    const cacheResultsExpires = await client.expire("users:all", 180);
+
+    console.log(response);
+    console.log(cacheResultsExpires);
 
     res.json({
       message: "Users fetched successfully",

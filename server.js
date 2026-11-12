@@ -8,7 +8,7 @@ app.use(express.json());
 
 const userRoutes = require("./routes/user");
 
-// const client = require("./Client");
+const client = require("./redis/Client");
 
 const connectDB = require("./config/database");
 
